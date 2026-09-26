@@ -77,8 +77,11 @@ services:
 
   n8n-import:
     image: n8nio/n8n:2.40.7
-    entrypoint: ["n8n"]
-    command: ["import:workflow", "--input=/workflows/document-ingestion.json"]
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        n8n import:workflow --input=/workflows/document-ingestion.json &&
+        n8n publish:workflow --id=rag-document-ingestion
     environment: &n8n-environment
       DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: postgres
@@ -88,7 +91,7 @@ services:
       DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-ragpassword}
       DB_POSTGRESDB_SCHEMA: n8n
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-local-development-encryption-key}
-      N8N_RUNNERS_ENABLED: "true"
+      N8N_RUNNERS_ENABLED: "false"
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
     volumes:
       - n8n_data:/home/node/.n8n

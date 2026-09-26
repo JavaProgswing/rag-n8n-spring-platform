@@ -9,9 +9,10 @@ spring:
     password:
   flyway:
     enabled: false
+  mongodb:
+    uri: mongodb://localhost:27017/rag_audit
   data:
     mongodb:
-      uri: mongodb://localhost:27017/rag_audit
       repositories:
         enabled: false
     redis:
@@ -84,9 +85,12 @@ spring:
     password: ${POSTGRES_PASSWORD:ragpassword}
   flyway:
     enabled: true
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://raguser:ragpassword@mongodb:27017/rag_audit?authSource=admin}
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://raguser:ragpassword@mongodb:27017/rag_audit?authSource=admin}
+      repositories:
+        enabled: false
     redis:
       host: ${REDIS_HOST:redis}
       port: ${REDIS_PORT:6379}

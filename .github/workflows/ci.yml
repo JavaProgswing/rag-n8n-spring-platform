@@ -54,13 +54,26 @@ jobs:
             sleep 5
           done
 
-          curl --fail --silent +            --request POST +            --header "Content-Type: application/json" +            --data '{"title":"CI operations guide","source":"n8n-ci","content":"For a priority one incident, the incident commander coordinates recovery and records the timeline."}' +            http://localhost:5678/webhook/knowledge-ingest |
+          curl --fail --silent \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --data '{"title":"CI operations guide","source":"n8n-ci","content":"For a priority one incident, the incident commander coordinates recovery and records the timeline."}' \
+            http://localhost:5678/webhook/knowledge-ingest |
             jq -e '.chunksCreated >= 1' > /dev/null
 
-          curl --fail --silent +            --request POST +            --header "Content-Type: application/json" +            --data '{"question":"Who coordinates priority one recovery?","topK":3,"conversationId":"ci"}' +            http://localhost:8080/api/v1/query > /tmp/first-query.json
-          jq -e '.cached == false and (.sources | length) >= 1 and (.answer | contains("incident commander"))' +            /tmp/first-query.json > /dev/null
+          curl --fail --silent \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --data '{"question":"Who coordinates priority one recovery?","topK":3,"conversationId":"ci"}' \
+            http://localhost:8080/api/v1/query > /tmp/first-query.json
+          jq -e '.cached == false and (.sources | length) >= 1 and (.answer | contains("incident commander"))' \
+            /tmp/first-query.json > /dev/null
 
-          curl --fail --silent +            --request POST +            --header "Content-Type: application/json" +            --data '{"question":"Who coordinates priority one recovery?","topK":3,"conversationId":"ci"}' +            http://localhost:8080/api/v1/query > /tmp/second-query.json
+          curl --fail --silent \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --data '{"question":"Who coordinates priority one recovery?","topK":3,"conversationId":"ci"}' \
+            http://localhost:8080/api/v1/query > /tmp/second-query.json
           jq -e '.cached == true' /tmp/second-query.json > /dev/null
       - name: Show service logs on failure
         if: failure()
