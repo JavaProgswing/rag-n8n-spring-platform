@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk AS build
+FROM eclipse-temurin:24-jdk AS build
 WORKDIR /workspace
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
@@ -6,7 +6,7 @@ RUN chmod +x mvnw && ./mvnw --batch-mode dependency:go-offline
 COPY src/ src/
 RUN ./mvnw --batch-mode -DskipTests package
 
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:24-jre
 RUN useradd --system --uid 10001 --create-home spring
 WORKDIR /app
 COPY --from=build /workspace/target/rag-n8n-spring-platform-*.jar app.jar
