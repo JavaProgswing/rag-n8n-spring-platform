@@ -20,6 +20,8 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
+      - name: Make Maven wrapper executable
+        run: chmod +x mvnw
       - name: Test and package
         run: ./mvnw --batch-mode verify
       - name: Validate Docker Compose
