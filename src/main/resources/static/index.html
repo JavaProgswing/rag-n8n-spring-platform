@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RAG Automation Platform</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">SPRING BOOT · n8n · MULTI-DATABASE</p>
+        <h1>RAG Automation Platform</h1>
+        <p class="lede">Add trusted knowledge, ask grounded questions, and inspect every cited passage.</p>
+      </div>
+      <div id="status" class="status">Connecting…</div>
+    </header>
+
+    <section class="grid">
+      <article class="panel">
+        <span class="step">01</span>
+        <h2>Add knowledge</h2>
+        <form id="ingest-form">
+          <label>Title<input id="title" required maxlength="200" value="Platform overview"></label>
+          <label>Source<input id="source" required maxlength="500" value="manual-entry"></label>
+          <label>Content<textarea id="content" required rows="10" placeholder="Paste a document, runbook, policy, or article…"></textarea></label>
+          <button type="submit">Ingest document</button>
+        </form>
+        <output id="ingest-result"></output>
+      </article>
+
+      <article class="panel">
+        <span class="step">02</span>
+        <h2>Ask the knowledge base</h2>
+        <form id="query-form">
+          <label>Question<textarea id="question" required rows="4" placeholder="What does the knowledge base say about…?"></textarea></label>
+          <label>Sources to retrieve<input id="top-k" type="number" min="1" max="10" value="4"></label>
+          <button type="submit">Retrieve answer</button>
+        </form>
+        <div id="answer" class="answer empty">Your grounded answer will appear here.</div>
+        <div id="sources"></div>
+      </article>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

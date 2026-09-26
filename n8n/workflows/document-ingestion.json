@@ -1,0 +1,62 @@
+{
+  "id": "rag-document-ingestion",
+  "name": "RAG - Document Ingestion Webhook",
+  "active": true,
+  "nodes": [
+    {
+      "id": "6f00572d-582d-4c68-8af5-2218fc1ab85c",
+      "name": "Document Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-520, 0],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "knowledge-ingest",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "rag-knowledge-ingest"
+    },
+    {
+      "id": "a5679d4c-7374-4ef8-9397-ef37bfcd7fa4",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-280, 0],
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nfor (const field of ['title', 'content']) {\n  if (!body[field] || typeof body[field] !== 'string') {\n    throw new Error(`Missing required string: ${field}`);\n  }\n}\nreturn [{ json: { title: body.title.trim(), source: (body.source ?? 'n8n-webhook').trim(), content: body.content.trim() } }];"
+      }
+    },
+    {
+      "id": "e4a9cab3-006f-4a7a-ae20-63d13ca3b0f4",
+      "name": "Index in Spring RAG API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-20, 0],
+      "parameters": {
+        "method": "POST",
+        "url": "http://app:8080/api/v1/documents",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Document Webhook": {
+      "main": [[{ "node": "Validate Input", "type": "main", "index": 0 }]]
+    },
+    "Validate Input": {
+      "main": [[{ "node": "Index in Spring RAG API", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}

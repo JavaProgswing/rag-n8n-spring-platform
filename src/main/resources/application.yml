@@ -1,0 +1,105 @@
+spring:
+  application:
+    name: rag-n8n-spring-platform
+  profiles:
+    default: local
+  datasource:
+    url: jdbc:h2:mem:raglocal;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  flyway:
+    enabled: false
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/rag_audit
+      repositories:
+        enabled: false
+    redis:
+      host: localhost
+      port: 6379
+      repositories:
+        enabled: false
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  health:
+    mongo:
+      enabled: false
+    redis:
+      enabled: false
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: RAG Automation Platform
+    description: Spring Boot RAG API orchestrated by n8n
+    version: '@project.version@'
+
+app:
+  vector-store: ${VECTOR_STORE:memory}
+  cache: ${CACHE_PROVIDER:memory}
+  audit: ${AUDIT_PROVIDER:memory}
+  answer-provider: ${ANSWER_PROVIDER:extractive}
+  embedding-dimensions: 384
+  chunk-size: 120
+  chunk-overlap: 20
+  ollama:
+    base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    chat-model: ${OLLAMA_CHAT_MODEL:llama3.2:3b}
+
+logging:
+  level:
+    dev.yashasvi.ragplatform: INFO
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.mongodb.autoconfigure.MongoAutoConfiguration
+      - org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration
+
+---
+spring:
+  config:
+    activate:
+      on-profile: production
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/ragdb}
+    username: ${POSTGRES_USER:raguser}
+    password: ${POSTGRES_PASSWORD:ragpassword}
+  flyway:
+    enabled: true
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://raguser:ragpassword@mongodb:27017/rag_audit?authSource=admin}
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:ragredis}
+
+management:
+  health:
+    mongo:
+      enabled: true
+    redis:
+      enabled: true
+
+app:
+  vector-store: postgres
+  cache: redis
+  audit: mongodb
