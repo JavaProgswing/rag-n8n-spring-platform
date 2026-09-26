@@ -44,7 +44,7 @@ jobs:
           done
 
           for attempt in {1..30}; do
-            if curl --fail --silent --connect-timeout 2 --max-time 5 http://localhost:5678/healthz > /dev/null; then
+            if curl --fail --silent --connect-timeout 2 --max-time 5 http://localhost:5678/healthz/readiness > /dev/null; then
               break
             fi
             if [ "$attempt" -eq 30 ]; then
@@ -54,12 +54,23 @@ jobs:
             sleep 5
           done
 
-          curl --fail --silent \
-            --request POST \
-            --header "Content-Type: application/json" \
-            --data '{"title":"CI operations guide","source":"n8n-ci","content":"For a priority one incident, the incident commander coordinates recovery and records the timeline."}' \
-            http://localhost:5678/webhook/knowledge-ingest |
-            jq -e '.chunksCreated >= 1' > /dev/null
+          for attempt in {1..30}; do
+            response_code=$(curl --silent --output /tmp/ingest.json --write-out '%{http_code}' \
+              --connect-timeout 2 --max-time 10 \
+              --request POST \
+              --header "Content-Type: application/json" \
+              --data '{"title":"CI operations guide","source":"n8n-ci","content":"For a priority one incident, the incident commander coordinates recovery and records the timeline."}' \
+              http://localhost:5678/webhook/knowledge-ingest || true)
+            if [ "$response_code" = "200" ] && jq -e '.chunksCreated >= 1' /tmp/ingest.json > /dev/null 2>&1; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              echo "n8n ingestion failed with HTTP $response_code"
+              cat /tmp/ingest.json
+              exit 1
+            fi
+            sleep 2
+          done
 
           curl --fail --silent \
             --request POST \

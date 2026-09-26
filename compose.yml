@@ -91,7 +91,6 @@ services:
       DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-ragpassword}
       DB_POSTGRESDB_SCHEMA: n8n
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-local-development-encryption-key}
-      N8N_RUNNERS_ENABLED: "false"
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
     volumes:
       - n8n_data:/home/node/.n8n
@@ -111,7 +110,7 @@ services:
       N8N_PORT: 5678
       N8N_PROTOCOL: http
       N8N_SECURE_COOKIE: "false"
-      WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:5678/}
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://localhost:5678/}
       GENERIC_TIMEZONE: Asia/Kolkata
     ports:
       - "5678:5678"
@@ -120,6 +119,11 @@ services:
     depends_on:
       n8n-import:
         condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5678/healthz/readiness >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     restart: unless-stopped
 
 volumes:
